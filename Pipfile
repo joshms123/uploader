@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+sound-lib = {git = "https://github.com/accessibleapps/sound_lib"}
+requests = "*"
+tweepy = "==3.10.0"
+tweak = "*"
+wxpython = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

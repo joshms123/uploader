@@ -1,3 +1,7 @@
+New in 2.1
+Thanks Josh (@joshms123) for these changes! :)
+* Updates to Python3
+* Removes Soundcache
 New in 2.0
 *Adds Audio Recording support.
 New in 1.2

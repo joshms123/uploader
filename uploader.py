@@ -93,6 +93,7 @@ class AudioUploader(wx.Frame):
 		audio.name=path.basename(audio.filename)
 		if audio.is_recording==True:
 			audio.cleanup()
+		self.record.Hide()
 
 		self.upload.Show()
 

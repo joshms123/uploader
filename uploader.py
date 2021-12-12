@@ -1,6 +1,5 @@
 import audio_input
 from threading import Thread
-import tweepy
 import webbrowser
 from tweak import Config
 import os.path as path
@@ -13,14 +12,11 @@ import wx
 
 # Globals
 
-tw1="MneWylqkykEp95neIxCvN1i2J" # twitter app key
-tw2="jPdug6Dl9IWxJvtsaQRqT120jYKf8bXl3drKFshw8JzGQCm6XX" # twitter app secret
-services = ['SNDUp'] # supported audio upload services
 audio=audio_input.AudioInput()
 
 
 class AudioUploader(wx.Frame):
-	"""Application to allow uploading of audio files to SndUp and other similar services"""
+	"""Application to allow uploading of audio files to SndUp"""
 	def __init__(self, title):
 		self.recording=False
 		wx.Frame.__init__(self, None, title=title, size=(350,200)) # initialize the wx frame
@@ -40,22 +36,10 @@ class AudioUploader(wx.Frame):
 		self.link = wx.TextCtrl(self.panel, -1, "",style=wx.TE_READONLY)
 		self.link.SetValue("Waiting for audio...")
 		self.main_box.Add(self.link, 0, wx.ALL, 10)
-		self.services_label=wx.StaticText(self.panel, -1, "Upload to")
-		self.services = wx.ComboBox(self.panel, -1, choices=services, value=services[0], style=wx.CB_READONLY)
-		self.services.Bind(wx.EVT_COMBOBOX, self.on_service_change)
-		self.main_box.Add(self.services, 0, wx.ALL, 10)
 		self.upload = wx.Button(self.panel, -1, "&Upload")
 		self.upload.Bind(wx.EVT_BUTTON, self.OnUpload)
 		self.main_box.Add(self.upload, 0, wx.ALL, 10)
 		self.upload.Hide()
-		self.twitter_label = wx.StaticText(self.panel, -1,"Tweet Te&xt")
-		self.twitter_text = wx.TextCtrl(self.panel, -1, "")
-		self.main_box.Add(self.twitter_text, 0, wx.ALL, 10)
-		self.twitter_text.Hide()
-		self.tweet = wx.Button(self.panel, -1, "&Tweet")
-		self.tweet.Bind(wx.EVT_BUTTON, self.Tweet)
-		self.tweet.Hide()
-		self.main_box.Add(self.tweet, 0, wx.ALL, 10)
 		self.new = wx.Button(self.panel, -1, "&Attach another file")
 		self.new.Bind(wx.EVT_BUTTON, self.Reset)
 		self.main_box.Add(self.new, 0, wx.ALL, 10)
@@ -71,17 +55,18 @@ class AudioUploader(wx.Frame):
 
 	def StartUpload(self):
 		"""Starts an upload; only runs after a standard operating system find file dialog has been shown and a file selected"""
-		self.services.Hide()
 		self.select_file.Hide()
 		self.upload.Hide()
 		self.record.Hide()
 		self.link.Show()
 		self.link.SetFocus()
 		r=requests.post("https://www.sndup.net/post.php", files={"file":open(audio.filename,'rb')})
-		self.link.SetValue(handle_URL(r.json()))
-		self.new.Show()
-		self.twitter_text.Show()
-		self.tweet.Show()
+		try:
+			self.link.SetValue(handle_URL(r.json()))
+			self.new.Show()
+		except:
+			self.link.SetValue("Error: "+str(r.text))
+			self.new.Show()
 
 	def Record(self,event):
 		if self.recording==False:
@@ -101,7 +86,7 @@ class AudioUploader(wx.Frame):
 
 	def SelectFile(self,event):
 		"""Opens a standard OS find file dialog to find an audio file to upload"""
-		openFileDialog = wx.FileDialog(self, "Select the audio file to be uploaded", "", "", "Audio Files (*.mp3, *.ogg, *.wav)|*.mp3; *.ogg; *.wav", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+		openFileDialog = wx.FileDialog(self, "Select the audio file to be uploaded", "", "", "Audio Files (*.mp3, *.ogg, *.wav, *.flac, *.opus)|*.mp3; *.ogg; *.wav; *.flac; *.opus", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 		if openFileDialog.ShowModal() == wx.ID_CANCEL:
 			return False
 		audio.filename= openFileDialog.GetPath()
@@ -111,25 +96,8 @@ class AudioUploader(wx.Frame):
 
 		self.upload.Show()
 
-	def Tweet(self, event):
-		auth = tweepy.OAuthHandler(tw1, tw2)
-		if self.config.get("TWKey", "") =="" or self.config.get("TWSecret", "") =="":
-			webbrowser.open(auth.get_authorization_url())
-			verifier = ask(parent=self, message='Enter pin:')
-			auth.get_access_token(verifier)
-			self.config["TWKey"]=auth.access_token
-			self.config["TWSecret"]=auth.access_token_secret
-		else:
-			auth.set_access_token(self.config["TWKey"], self.config["TWSecret"])
-		api = tweepy.API(auth)
-		api.update_status(self.twitter_text.GetValue()+" "+self.link.GetValue()+" #audio")
-
 	def Reset(self, event):
-		self.twitter_text.SetValue("")
-		self.twitter_text.Hide()
-		self.tweet.Hide()
 		self.record.Show()
-		self.services.Show()
 		self.upload.Hide()
 		self.new.Hide()
 		self.select_file.Show()
@@ -137,12 +105,6 @@ class AudioUploader(wx.Frame):
 		self.link.ChangeValue("")
 		if audio.is_recording==True:
 			audio.cleanup()
-
-	def on_service_change(self, event):
-		"""Event handler for when the service combo box changes.
-			Currently it just hides unnecessary fields for different services. For example, TWUp doesn't have an API key system, so we shouldn't keep the text field that SNDUp needs when it isn't selected.
-		"""
-		dir(event)
 
 	def OnClose(self, event):
 		"""App close event handler"""

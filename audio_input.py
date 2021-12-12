@@ -1,4 +1,3 @@
-import paths
 import platform
 import subprocess
 import os
@@ -17,7 +16,7 @@ class AudioInput(object):
 	def encode(self,filename, quality=4.5):
 		system = platform.system()
 		if system == "Windows":
-			subprocess.call(r'"%s" -q %r "%s"' % (paths.app_path('oggenc2.exe'), quality, filename))
+			subprocess.call(r'"%s" -q %r "%s"' % ("oggenc2.exe", quality, filename))
 			return self.filename.replace(".wav",".ogg")
 		else:
 			print("Converting not implimented for this operating system. WAV file incoming.")

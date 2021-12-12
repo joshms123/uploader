@@ -4,8 +4,7 @@ import subprocess
 import os
 import tempfile
 import sound_lib
-from sound_lib import input
-from sound_lib import recording
+from sound_lib import input, recording
 
 class AudioInput(object):
 	def __init__(self):
@@ -21,7 +20,7 @@ class AudioInput(object):
 			subprocess.call(r'"%s" -q %r "%s"' % (paths.app_path('oggenc2.exe'), quality, filename))
 			return self.filename.replace(".wav",".ogg")
 		else:
-			print "Converting not implimented for this operating system. WAV file incoming."
+			print("Converting not implimented for this operating system. WAV file incoming.")
 			return self.filename
 
 	def start_recording(self):

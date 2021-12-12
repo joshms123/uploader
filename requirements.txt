@@ -1,4 +1,4 @@
-http://hg.q-continuum.net/sound_lib/archive/tip.tar.gz
+git+https://github.com/accessibleapps/sound_lib
 requests
 configobj
 validate

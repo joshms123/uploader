@@ -70,7 +70,7 @@ class AudioUploader(wx.Frame):
 		try:
 			wx.CallAfter(lambda: ShowLink(self,r.json()['url']))
 		except:
-			ShowLink(self,"Error: "+str(r.text))
+			ShowLink(self, f"Error: {r.text}")
 		self.Reset()
 
 	def Record(self,event):
@@ -127,6 +127,6 @@ def ask(parent=None, message='', default_value=''):
 
 
 app = wx.App(redirect=False)
-window=AudioUploader(application.name+" "+application.version)
+window = AudioUploader(f"{application.name} {application.version}")
 window.Show()
 app.MainLoop()

@@ -41,5 +41,4 @@ class AudioInput(object):
 		self.is_recording=False
 
 	def recording(self,filename):
-		val = recording.WaveRecording(filename=filename)
-		return val
+		return recording.WaveRecording(filename=filename)
